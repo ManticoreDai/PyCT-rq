@@ -3,8 +3,7 @@ import numpy as np
 from utils.pyct_attack_exp import get_save_dir_from_save_exp
 
 ##### Generate Inputs #####
-
-def pyct_shap_1_4_8_16_32_48_64(model_name, first_n_img):
+def pyct_shap_1_4_8_16_32(model_name, first_n_img):
     from utils.dataset import MnistDataset
     mnist_dataset = MnistDataset()
         
@@ -49,7 +48,7 @@ def pyct_shap_1_4_8_16_32_48_64(model_name, first_n_img):
     return inputs
 
 
-def pyct_random_1_4_8_16_32_48_64(model_name, first_n_img):
+def pyct_random_1_4_8_16_32(model_name, first_n_img):
     from utils.dataset import MnistDataset
     from utils.gen_random_pixel_location import mnist_test_data_10000
     

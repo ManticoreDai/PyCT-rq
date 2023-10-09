@@ -1,6 +1,8 @@
 import os
 import json
 import numpy as np
+import queue
+import traceback
 
 # all of Generate Inputs functions in this file are only for model "mnist_sep_act_m6_9628"
 
@@ -23,8 +25,56 @@ def run_multi_attack_subprocess_wall_timeout(args, timeout, norm):
             max_iter=0, total_timeout=timeout, single_timeout=timeout, timeout=timeout
         )
         
-        recorder = result[0]
+        recorder = result[1]
 
+
+def run_multi_attack_subprocess_wall_timeout_task_queue(task_queue, hierarchical_input, timeout, norm):
+    import run_dnnct
+    
+    while True:
+        try:
+            atk_feature_num, one_input = task_queue.get(timeout=1)  # 從佇列中取出任務，等待 1 秒
+            exp_name = one_input['save_exp']['exp_name']
+            input_name = one_input['save_exp']['input_name']
+            q_or_s = None
+            
+            if one_input['solve_order_stack'] is True:
+                q_or_s = 'stack'
+            elif one_input['solve_order_stack'] is False:
+                q_or_s = 'queue'
+                
+            print(one_input['save_exp'])
+            
+            
+            result = run_dnnct.run(
+                **one_input, norm=norm,
+                max_iter=0, total_timeout=timeout, single_timeout=timeout, timeout=timeout
+            )
+            
+            recorder = result[1]
+                                    
+            if recorder.attack_label is not None:
+                # 攻擊成功
+                print("#" * 80)
+                print(f"攻擊成功，參數如下：")
+                print(one_input['save_exp'])
+                print(q_or_s)
+                print("#" * 80)
+            else:
+                # 攻擊失敗 加入下一個input到 task_queue                
+                next_input_dict = hierarchical_input[q_or_s][input_name]['next_input_dict']
+                if atk_feature_num in next_input_dict:                    
+                    # 如果有下一個可以跑的atk_feature_num
+                    task_queue.put(next_input_dict[atk_feature_num])
+                    
+        except queue.Empty:
+            break  # 如果佇列空了，結束子進程
+        
+        except Exception as e:
+            print("#"*50, "Exception", "#"*50)
+            traceback.print_stack()
+            print("#" * 100)
+            
 
 def run_multi_attack_subprocess_cpu_timeout(args, cpu_timeout):
     import run_dnnct
