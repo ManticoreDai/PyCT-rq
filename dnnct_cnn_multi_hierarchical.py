@@ -6,8 +6,8 @@ NORM_01 = True
 # model_name = "mnist_sep_act_m7_9876"
 model_name = "mnist_sep_act_m6_9628"
 
-NUM_PROCESS = 3
-TIMEOUT = 60
+NUM_PROCESS = 30
+TIMEOUT = 3600
 
 if __name__ == "__main__":
     from utils.pyct_attack_exp import run_multi_attack_subprocess_wall_timeout, run_multi_attack_subprocess_wall_timeout_task_queue
@@ -15,7 +15,7 @@ if __name__ == "__main__":
         mnist_shap_1_4_8_16_32,        
     )
 
-    inputs = mnist_shap_1_4_8_16_32(model_name, first_n_img=5)
+    inputs = mnist_shap_1_4_8_16_32(model_name, first_n_img=100)
         
     hierarchical_input = {
         'queue': dict(),
