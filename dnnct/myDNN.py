@@ -81,6 +81,10 @@ def my_exp(x):
         except mathexpError:
             print(x, 'math.expError')
 
+
+# exp_func = math.exp
+exp_func = my_exp
+
 def act_tanh(x):
     if x == 0:
         return 0.0
@@ -93,8 +97,8 @@ def act_tanh(x):
     else:
         # exp_x = my_exp(x)
         # exp_minus_x = my_exp(-x)
-        exp_x = math.exp(x)
-        exp_minus_x = math.exp(-x)
+        exp_x = exp_func(x)
+        exp_minus_x = exp_func(-x)
         return (exp_x - exp_minus_x) / (exp_x + exp_minus_x)
 
 def act_sigmoid(x):
@@ -107,11 +111,11 @@ def act_sigmoid(x):
         return 0.0
     else:
         # return 1.0 / (1.0 + my_exp(-x))
-        return 1.0 / (1.0 + math.exp(-x))
+        return 1.0 / (1.0 + exp_func(-x))
 
 def act_softmax(x):
     # exp_values = [concolic_exp(val) for val in x]    # 計算指數函數
-    exp_values = [math.exp(val) for val in x]    # 計算指數函數
+    exp_values = [exp_func(val) for val in x]    # 計算指數函數
     softmax_values = [val / sum(exp_values) for val in exp_values]    # 計算softmax值
     return softmax_values
 
