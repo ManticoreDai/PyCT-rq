@@ -36,6 +36,7 @@ def run_multi_attack_subprocess_wall_timeout_task_queue(task_queue, hierarchical
             atk_feature_num, one_input = task_queue.get(timeout=1)  # 從佇列中取出任務，等待 1 秒
             exp_name = one_input['save_exp']['exp_name']
             input_name = one_input['save_exp']['input_name']
+            model_name = one_input['model_name']
             q_or_s = None
             
             if one_input['solve_order_stack'] is True:
@@ -44,6 +45,10 @@ def run_multi_attack_subprocess_wall_timeout_task_queue(task_queue, hierarchical
                 q_or_s = 'queue'
                 
             print(one_input['save_exp'])
+            
+            tmp = f"{model_name} {q_or_s} {exp_name} {input_name}\n"
+            with open(f'./log/{model_name}.log', 'a') as f:
+                f.write(tmp)
             
             
             result = run_dnnct.run(
