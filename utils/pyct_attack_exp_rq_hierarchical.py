@@ -161,10 +161,20 @@ def rnn_mnist_shap_1_4_8_16_32_filter_input(model_name):
     }
     
     filter_queue = ['mnist_test_0', 'mnist_test_14', 'mnist_test_17', 'mnist_test_25', 'mnist_test_26',
-                    'mnist_test_28', 'mnist_test_30', 'mnist_test_32', 'mnist_test_35', 'mnist_test_36', 'mnist_test_39', 'mnist_test_40', 'mnist_test_58', 'mnist_test_59', 'mnist_test_6', 'mnist_test_60', 'mnist_test_61', 'mnist_test_69', 'mnist_test_70', 'mnist_test_71', 'mnist_test_72', 'mnist_test_75', 'mnist_test_76', 'mnist_test_77', 'mnist_test_79', 'mnist_test_8', 'mnist_test_82', 'mnist_test_83', 'mnist_test_85', 'mnist_test_86', 'mnist_test_87', 'mnist_test_91', 'mnist_test_94']
+                    'mnist_test_28', 'mnist_test_30', 'mnist_test_32', 'mnist_test_35', 'mnist_test_36', 'mnist_test_39',
+                    'mnist_test_40', 'mnist_test_58', 'mnist_test_59', 'mnist_test_6', 'mnist_test_60', 'mnist_test_61',
+                    'mnist_test_69', 'mnist_test_70', 'mnist_test_71', 'mnist_test_72', 'mnist_test_75', 'mnist_test_76',
+                    'mnist_test_77', 'mnist_test_79', 'mnist_test_8', 'mnist_test_82', 'mnist_test_83', 'mnist_test_85',
+                    'mnist_test_86', 'mnist_test_87', 'mnist_test_91', 'mnist_test_94']
     
     filter_stack = ['mnist_test_0', 'mnist_test_1', 'mnist_test_10', 'mnist_test_13',
-                    'mnist_test_14', 'mnist_test_16', 'mnist_test_17', 'mnist_test_19', 'mnist_test_2', 'mnist_test_20', 'mnist_test_25', 'mnist_test_26', 'mnist_test_27', 'mnist_test_28', 'mnist_test_29', 'mnist_test_30', 'mnist_test_32', 'mnist_test_34', 'mnist_test_35', 'mnist_test_36', 'mnist_test_40', 'mnist_test_41', 'mnist_test_45', 'mnist_test_57', 'mnist_test_58', 'mnist_test_59', 'mnist_test_6', 'mnist_test_60', 'mnist_test_61', 'mnist_test_64', 'mnist_test_69', 'mnist_test_70', 'mnist_test_71', 'mnist_test_72', 'mnist_test_75', 'mnist_test_76', 'mnist_test_77', 'mnist_test_78', 'mnist_test_79', 'mnist_test_8', 'mnist_test_80', 'mnist_test_82', 'mnist_test_83', 'mnist_test_85', 'mnist_test_86', 'mnist_test_87', 'mnist_test_9', 'mnist_test_90', 'mnist_test_93']
+                    'mnist_test_14', 'mnist_test_16', 'mnist_test_17', 'mnist_test_19', 'mnist_test_2', 'mnist_test_20', 'mnist_test_25',
+                    'mnist_test_26', 'mnist_test_27', 'mnist_test_28', 'mnist_test_29', 'mnist_test_30', 'mnist_test_32', 'mnist_test_34',
+                    'mnist_test_35', 'mnist_test_36', 'mnist_test_40', 'mnist_test_41', 'mnist_test_45', 'mnist_test_57', 'mnist_test_58',
+                    'mnist_test_59', 'mnist_test_6', 'mnist_test_60', 'mnist_test_61', 'mnist_test_64', 'mnist_test_69', 'mnist_test_70',
+                    'mnist_test_71', 'mnist_test_72', 'mnist_test_75', 'mnist_test_76', 'mnist_test_77', 'mnist_test_78', 'mnist_test_79',
+                    'mnist_test_8', 'mnist_test_80', 'mnist_test_82', 'mnist_test_83', 'mnist_test_85', 'mnist_test_86', 'mnist_test_87',
+                    'mnist_test_9', 'mnist_test_90', 'mnist_test_93']
 
 
     for solve_order_stack in [False, True]:
