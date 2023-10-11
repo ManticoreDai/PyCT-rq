@@ -597,3 +597,55 @@ def pyct_imdb_random_1_range02(model_name, first_n_img):
                 inputs.append(one_input)
                 
     return inputs
+
+
+def paper_example_RNN_fake_data(model_name):    
+    from utils.dataset import Paper_Example_RNN_Fake_Dataset
+    first_n_data = 1
+    
+    fake_dataset = Paper_Example_RNN_Fake_Dataset()
+    fake_data_attack_feature_choose = [
+        [[1, 0], ],  # test_0        
+    ]
+    fake_data_attack_feature_choose = np.array(fake_data_attack_feature_choose)
+    
+    inputs = []
+
+    for solve_order_stack in [False]:
+        if solve_order_stack:
+            s_or_q = "stack"
+        else:
+            s_or_q = "queue"
+
+        for atk_feature_num in [1]:
+            
+            for idx in range(first_n_data):
+                save_exp = {
+                    "input_name": f"test_{idx}",
+                    "exp_name": f"choose_{atk_feature_num}",
+                    "save_smt": True
+                }
+
+                save_dir = get_save_dir_from_save_exp(save_exp, model_name, s_or_q, only_first_forward=False)
+                if os.path.exists(save_dir):
+                    # 已經有紀錄的圖跳過
+                    continue
+                                
+                attack_pixels = fake_data_attack_feature_choose[idx, :atk_feature_num].tolist()
+                in_dict, con_dict = fake_dataset.get_test_data_and_set_condict(idx, attack_pixels)
+                
+                
+                one_input = {
+                    'model_name': model_name,
+                    'in_dict': in_dict,
+                    'con_dict': con_dict,
+                    'solve_order_stack': solve_order_stack,
+                    'save_exp': save_exp,
+                    'only_first_forward': True
+                }
+
+                inputs.append(one_input)
+                
+    return inputs
+
+
