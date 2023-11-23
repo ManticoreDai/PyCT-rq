@@ -3,6 +3,7 @@ import numpy as np
 from utils.pyct_attack_exp import get_save_dir_from_save_exp
 
 ##### Generate Inputs #####
+
 def pyct_shap_1_4_8_16_32(model_name, first_n_img):
     from utils.dataset import MnistDataset
     mnist_dataset = MnistDataset()
@@ -92,7 +93,7 @@ def pyct_random_1_4_8_16_32(model_name, first_n_img):
                 
     return inputs
 
-def pyct_rnn_random_1_4_8_16_32_48_64(model_name, first_n_img):
+def pyct_rnn_random_1_4_8_16_32(model_name, first_n_img):
     from utils.dataset import RNN_MnistDataset
     from utils.gen_random_pixel_location import rnn_mnist_test_data_10000
     
@@ -136,7 +137,7 @@ def pyct_rnn_random_1_4_8_16_32_48_64(model_name, first_n_img):
                 
     return inputs
 
-def pyct_rnn_shap_1_4_8_16_32_48_64(model_name, first_n_img):
+def pyct_rnn_shap_1_4_8_16_32(model_name, first_n_img):
     from utils.dataset import RNN_MnistDataset
     mnist_dataset = RNN_MnistDataset()
         
@@ -181,234 +182,10 @@ def pyct_rnn_shap_1_4_8_16_32_48_64(model_name, first_n_img):
                 
     return inputs
 
-def pyct_rnn_shap_1_4_8_16_32_only_first_forward(model_name, first_n_img):
-    from utils.dataset import RNN_MnistDataset
-    mnist_dataset = RNN_MnistDataset()
-        
-    ### SHAP
-    test_shap_pixel_sorted = np.load(f'./shap_value/{model_name}/mnist_sort_shap_pixel.npy')
-    
-    inputs = []
-
-    for solve_order_stack in [False]:
-        if solve_order_stack:
-            s_or_q = "stack"
-        else:
-            s_or_q = "queue"
-
-        for ton_n_shap in [1,4,8,16,32]:
-            
-            for idx in range(first_n_img):
-                save_exp = {
-                    "input_name": f"mnist_test_{idx}",
-                    "exp_name": f"shap_{ton_n_shap}"
-                }
-
-                save_dir = get_save_dir_from_save_exp(save_exp, model_name, s_or_q, only_first_forward=True)
-                if os.path.exists(os.path.join(save_dir, 'stats.json')):
-                    # 已經有紀錄的圖跳過
-                    continue
-                                
-                attack_pixels = test_shap_pixel_sorted[idx, :ton_n_shap].tolist()
-                in_dict, con_dict = mnist_dataset.get_mnist_test_data_and_set_condict(idx, attack_pixels)
-                
-                
-                one_input = {
-                    'model_name': model_name,
-                    'in_dict': in_dict,
-                    'con_dict': con_dict,
-                    'solve_order_stack': solve_order_stack,
-                    'save_exp': save_exp,
-                    'only_first_forward': True,
-                }
-
-                inputs.append(one_input)
-                
-    return inputs
-
-# exp 4 only use queue for SHAP 1,4,8,16,32 + only_first_forward
-def pyct_shap_1_4_8_16_32_only_first_forward(model_name, first_n_img):
-    from utils.dataset import MnistDataset
-    mnist_dataset = MnistDataset()
-        
-    ### SHAP
-    test_shap_pixel_sorted = np.load(f'./shap_value/{model_name}/mnist_sort_shap_pixel.npy')
-    
-    inputs = []
-
-    for solve_order_stack in [False]:
-        if solve_order_stack:
-            s_or_q = "stack"
-        else:
-            s_or_q = "queue"
-
-        for ton_n_shap in [1,4,8,16,32]:
-            
-            for idx in range(first_n_img):
-                save_exp = {
-                    "input_name": f"mnist_test_{idx}",
-                    "exp_name": f"shap_{ton_n_shap}"
-                }
-
-                save_dir = get_save_dir_from_save_exp(save_exp, model_name, s_or_q, only_first_forward=True)
-                if os.path.exists(os.path.join(save_dir, 'stats.json')):
-                    # 已經有紀錄的圖跳過
-                    continue
-                                
-                attack_pixels = test_shap_pixel_sorted[idx, :ton_n_shap].tolist()
-                in_dict, con_dict = mnist_dataset.get_mnist_test_data_and_set_condict(idx, attack_pixels)
-                
-                
-                one_input = {
-                    'model_name': model_name,
-                    'in_dict': in_dict,
-                    'con_dict': con_dict,
-                    'solve_order_stack': solve_order_stack,
-                    'save_exp': save_exp,
-                    'only_first_forward': True,
-                }
-
-                inputs.append(one_input)
-                
-    return inputs
-
-def pyct_lstm_stock_1_4_8_16_32(model_name, first_n_img):
+def stock_shap_1_2_3_4_8_limit_range02(model_name, first_n_img):
     from utils.dataset import MSstock_Dataset
     stock_dataset = MSstock_Dataset()
-        
-    ### SHAP and hard image index
-    test_shap_pixel_sorted = np.load(f'./shap_value/{model_name}/stock_sort_shap_pixel.npy')
-    
-    inputs = []
 
-    for solve_order_stack in [False, True]:
-        if solve_order_stack:
-            s_or_q = "stack"
-        else:
-            s_or_q = "queue"
-
-        for ton_n_shap in [1,2,3,4,8]:
-            
-            for idx in [5,24,52,53,61,71,91,96,107,115,117,143,182,209,256,278,280,319,322,340,430]:
-                save_exp = {
-                    "input_name": f"stock_test_{idx}",
-                    "exp_name": f"shap_{ton_n_shap}"
-                }
-
-                save_dir = get_save_dir_from_save_exp(save_exp, model_name, s_or_q)
-                if os.path.exists(save_dir):
-                    # 已經有紀錄的圖跳過
-                    continue
-                                
-                attack_pixels = test_shap_pixel_sorted[idx, :ton_n_shap].tolist()
-                in_dict, con_dict = stock_dataset.get_stock_test_data_and_set_condict(idx, attack_pixels)
-                
-                
-                one_input = {
-                    'model_name': model_name,
-                    'in_dict': in_dict,
-                    'con_dict': con_dict,
-                    'solve_order_stack': solve_order_stack,
-                    'save_exp': save_exp,
-                }
-
-                inputs.append(one_input)
-                
-    return inputs
-
-def pyct_lstm_stock_1_4_8_16_32_only_first_forward(model_name, first_n_img):
-    from utils.dataset import MSstock_Dataset
-    stock_dataset = MSstock_Dataset()
-        
-    ### SHAP and hard image index
-    test_shap_pixel_sorted = np.load(f'./shap_value/{model_name}/stock_sort_shap_pixel.npy')
-    
-    inputs = []
-
-    for solve_order_stack in [False]:
-        if solve_order_stack:
-            s_or_q = "stack"
-        else:
-            s_or_q = "queue"
-
-        for ton_n_shap in [1,2,3,4,8]:
-            
-            for idx in range(first_n_img):
-                save_exp = {
-                    "input_name": f"stock_test_{idx}",
-                    "exp_name": f"shap_{ton_n_shap}"
-                }
-
-                save_dir = get_save_dir_from_save_exp(save_exp, model_name, s_or_q)
-                if os.path.exists(save_dir):
-                    # 已經有紀錄的圖跳過
-                    continue
-                                
-                attack_pixels = test_shap_pixel_sorted[idx, :ton_n_shap].tolist()
-                in_dict, con_dict = stock_dataset.get_stock_test_data_and_set_condict(idx, attack_pixels)
-                
-                
-                one_input = {
-                    'model_name': model_name,
-                    'in_dict': in_dict,
-                    'con_dict': con_dict,
-                    'solve_order_stack': solve_order_stack,
-                    'save_exp': save_exp,
-                    'only_first_forward': True,
-                }
-
-                inputs.append(one_input)
-                
-    return inputs
-
-def pyct_lstm_random_1_4_8_16(model_name, first_n_img):
-    from utils.dataset import MSstock_Dataset
-    from utils.gen_random_pixel_location import lstm_stock_strategy_502
-    
-    stock_dataset = MSstock_Dataset()        
-    random_pixels = lstm_stock_strategy_502()
-    
-    inputs = []
-
-    for solve_order_stack in [False, True]:
-        if solve_order_stack:
-            s_or_q = "stack"
-        else:
-            s_or_q = "queue"
-
-        for ton_n in [1,2,3,4,8]:
-            
-            for idx in range(first_n_img):
-                save_exp = {
-                    "input_name": f"stock_test_{idx}",
-                    "exp_name": f"random_{ton_n}"
-                }
-
-                save_dir = get_save_dir_from_save_exp(save_exp, model_name, s_or_q, only_first_forward=False)
-                if os.path.exists(save_dir):
-                    # 已經有紀錄的圖跳過
-                    continue
-                                
-                attack_pixels = random_pixels[idx, :ton_n].tolist()
-                in_dict, con_dict = stock_dataset.get_stock_test_data_and_set_condict(idx, attack_pixels)
-                
-                
-                one_input = {
-                    'model_name': model_name,
-                    'in_dict': in_dict,
-                    'con_dict': con_dict,
-                    'solve_order_stack': solve_order_stack,
-                    'save_exp': save_exp,
-                }
-
-                inputs.append(one_input)
-                
-    return inputs
-
-
-def pyct_lstm_stock_1_2_3_4_8_limit_range02(model_name, first_n_img):
-    from utils.dataset import MSstock_Dataset
-    stock_dataset = MSstock_Dataset()
     limit_p = 0.2
         
     ### SHAP and hard image index
@@ -454,7 +231,7 @@ def pyct_lstm_stock_1_2_3_4_8_limit_range02(model_name, first_n_img):
     return inputs
 
 
-def pyct_lstm_random_1_2_3_4_8_range02(model_name, first_n_img):
+def stock_random_1_2_3_4_8_range02(model_name, first_n_img):
     from utils.dataset import MSstock_Dataset
     from utils.gen_random_pixel_location import lstm_stock_strategy_502
     
@@ -500,61 +277,12 @@ def pyct_lstm_random_1_2_3_4_8_range02(model_name, first_n_img):
                 
     return inputs
 
-
-def pyct_lstm_stock_1_2_3_4_8_only_first_forward_range02(model_name, first_n_img):
-    from utils.dataset import MSstock_Dataset
-    stock_dataset = MSstock_Dataset()
-    limit_p = 0.2
-        
-    ### SHAP and hard image index
-    test_shap_pixel_sorted = np.load(f'./shap_value/{model_name}/stock_sort_shap_pixel.npy')
-    
-    inputs = []
-
-    for solve_order_stack in [False]:
-        if solve_order_stack:
-            s_or_q = "stack"
-        else:
-            s_or_q = "queue"
-
-        for ton_n_shap in [1,2,3,4,8]:
-            
-            for idx in range(first_n_img):
-                save_exp = {
-                    "input_name": f"stock_test_{idx}",                    
-                    "exp_name": f"limit_{limit_p}/shap_{ton_n_shap}"
-                }
-
-                save_dir = get_save_dir_from_save_exp(save_exp, model_name, s_or_q)
-                if os.path.exists(save_dir):
-                    # 已經有紀錄的圖跳過
-                    continue
-                                
-                attack_pixels = test_shap_pixel_sorted[idx, :ton_n_shap].tolist()
-                in_dict, con_dict = stock_dataset.get_stock_test_data_and_set_condict(idx, attack_pixels)
-                
-                
-                one_input = {
-                    'model_name': model_name,
-                    'in_dict': in_dict,
-                    'con_dict': con_dict,
-                    'solve_order_stack': solve_order_stack,
-                    'save_exp': save_exp,
-                    'only_first_forward': True,
-                    'limit_change_percentage': limit_p,
-                }
-
-                inputs.append(one_input)
-                
-    return inputs
-
-def pyct_imdb_random_1_range02(model_name, first_n_img):
+def imdb_shap_1_2_3_4_8_range02(model_name, first_n_img):
     from utils.dataset import IMDB_Dataset
     from utils.gen_random_pixel_location import lstm_imdb_30
     
     imdb_dataset = IMDB_Dataset()
     test_shap_pixel_sorted = np.load(f'./shap_value/{model_name}/imdb_sort_shap_pixel.npy')
-    # random_pixels = lstm_imdb_30()
     limit_p = 0.2
     
     inputs = []
@@ -565,13 +293,12 @@ def pyct_imdb_random_1_range02(model_name, first_n_img):
         else:
             s_or_q = "queue"
 
-        for ton_n in [1]:
+        for ton_n in [1,2,3,4,8]:
             
             for idx in range(first_n_img):
                 save_exp = {
                     "input_name": f"imdb_test_{idx}",
                     "exp_name": f"limit_{limit_p}/shap_{ton_n}",
-                    # "exp_name": f"limit_{limit_p}/random_{ton_n}",
                     # "save_smt": True
                 }
 
@@ -581,7 +308,6 @@ def pyct_imdb_random_1_range02(model_name, first_n_img):
                     continue
                 
                 attack_pixels = test_shap_pixel_sorted[idx, :ton_n].tolist()
-                # attack_pixels = random_pixels[idx, :ton_n].tolist()
                 in_dict, con_dict = imdb_dataset.get_imdb_test_data_and_set_condict(idx, attack_pixels)
                 
                 
@@ -598,41 +324,37 @@ def pyct_imdb_random_1_range02(model_name, first_n_img):
                 
     return inputs
 
-
-def paper_example_RNN_fake_data(model_name):    
-    from utils.dataset import Paper_Example_RNN_Fake_Dataset
-    first_n_data = 1
+def imdb_shap_1_2_3_4_8_range02(model_name, first_n_img):
+    from utils.dataset import IMDB_Dataset
+    from utils.gen_random_pixel_location import lstm_imdb_30
     
-    fake_dataset = Paper_Example_RNN_Fake_Dataset()
-    fake_data_attack_feature_choose = [
-        [[1, 0], ],  # test_0        
-    ]
-    fake_data_attack_feature_choose = np.array(fake_data_attack_feature_choose)
+    random_pixels = lstm_imdb_30()
+    limit_p = 0.2
     
     inputs = []
 
-    for solve_order_stack in [False]:
+    for solve_order_stack in [False, True]:
         if solve_order_stack:
             s_or_q = "stack"
         else:
             s_or_q = "queue"
 
-        for atk_feature_num in [1]:
+        for ton_n in [1,2,3,4,8]:
             
-            for idx in range(first_n_data):
+            for idx in range(first_n_img):
                 save_exp = {
-                    "input_name": f"test_{idx}",
-                    "exp_name": f"choose_{atk_feature_num}",
-                    "save_smt": True
+                    "input_name": f"imdb_test_{idx}",
+                    "exp_name": f"limit_{limit_p}/random_{ton_n}",
+                    # "save_smt": True
                 }
 
                 save_dir = get_save_dir_from_save_exp(save_exp, model_name, s_or_q, only_first_forward=False)
                 if os.path.exists(save_dir):
                     # 已經有紀錄的圖跳過
                     continue
-                                
-                attack_pixels = fake_data_attack_feature_choose[idx, :atk_feature_num].tolist()
-                in_dict, con_dict = fake_dataset.get_test_data_and_set_condict(idx, attack_pixels)
+                
+                attack_pixels = random_pixels[idx, :ton_n].tolist()
+                in_dict, con_dict = imdb_dataset.get_imdb_test_data_and_set_condict(idx, attack_pixels)
                 
                 
                 one_input = {
@@ -641,11 +363,9 @@ def paper_example_RNN_fake_data(model_name):
                     'con_dict': con_dict,
                     'solve_order_stack': solve_order_stack,
                     'save_exp': save_exp,
-                    'only_first_forward': True
+                    'limit_change_percentage': limit_p,
                 }
 
                 inputs.append(one_input)
                 
     return inputs
-
-

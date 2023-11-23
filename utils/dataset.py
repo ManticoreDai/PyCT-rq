@@ -88,7 +88,7 @@ class RNN_MnistDataset:
     def get_mnist_test_data_and_set_condict(self, idx, attack_pixels):
         in_dict, con_dict = self.get_mnist_test_data(idx)
         
-        for i,j in attack_pixels:
+        for i,j,k in attack_pixels:
             key = f"v_{i}_{j}"
             con_dict[key] = 1
         
@@ -165,44 +165,3 @@ class IMDB_Dataset:
             con_dict[key] = 1
         
         return in_dict, con_dict
-
-
-class Paper_Example_RNN_Fake_Dataset:
-    def __init__(self):        
-        x_test = []
-
-        tmp_x = [
-            [0.2, 0.4],
-            [-0.8, -0.4],
-        ]
-        x_test.append(tmp_x)
-         
-        self.x_test = np.array(x_test)      
-        
-    def get_test_data(self, idx):        
-        in_dict = dict()
-        con_dict = dict()
-
-        test_img = self.x_test[idx]
-
-        for i,j in itertools.product(
-            range(test_img.shape[0]),
-            range(test_img.shape[1])
-        ):
-            key = f"v_{i}_{j}"
-            in_dict[key] = float(test_img[i][j])
-            con_dict[key] = 0
-        
-        return in_dict, con_dict
-    
-    
-    def get_test_data_and_set_condict(self, idx, attack_pixels):
-        in_dict, con_dict = self.get_test_data(idx)
-        
-        for i,j in attack_pixels:
-            key = f"v_{i}_{j}"
-            con_dict[key] = 1
-        
-        return in_dict, con_dict
-
-
