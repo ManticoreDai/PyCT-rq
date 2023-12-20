@@ -244,28 +244,31 @@ class DenseLayer:
 
 
 class Conv2DLayer:
-    def __init__(self, weights, bias, shape, activation="None", stride=1, padding='valid'):
+    def __init__(self, weights, bias, shape, stride=1, activation="None", padding='valid'):
         self.weights = weights.astype(float)
         self.shape = shape
         self.bias = bias
         self.padding = padding
-        self.stride = stride
         self.activation = activation
+        self.stride = stride  # 新增 stride 参数
         self._output = None
+    
     def addActivation(self, activation):
         self.activation = activation
+
     def forward(self, tensor_in):
         in_shape = dim(tensor_in)
         assert in_shape[2] == self.shape[3], "Conv2DLayer, channel length mismatching!"
-        ## For now, we assume stride=1 and padding='valid'
-        ## TODO  stride!=1 and padding!='valid'
-        out_shape = [in_shape[0]-self.shape[1]+1,
-                     in_shape[1]-self.shape[2]+1,
+
+        # 计算输出形状，考虑步长
+        out_shape = [(in_shape[0] - self.shape[1]) // self.stride + 1,
+                     (in_shape[1] - self.shape[2]) // self.stride + 1,
                      self.shape[0]]
-        #tensor_out = np.zeros( out_shape ).tolist()
+
         tensor_out = []
+
         for _ in range(out_shape[0]):
-            tensor_out.append( [[0.0]*out_shape[2] for i in range(out_shape[1])] ) 
+            tensor_out.append([[0.0] * out_shape[2] for i in range(out_shape[1])])
 
         for channel in range(0, out_shape[2]):
             filter_weights = self.weights[channel]
@@ -273,25 +276,25 @@ class Conv2DLayer:
             for row in range(0, out_shape[0]):
                 for col in range(0, out_shape[1]):
                     tensor_out[row][col][channel] = float(self.bias[channel])
-                    ## inner product of the filter and the input image segments
-                    for i, j, k in product( range(row, row+num_row),
-                                            range(col, col+num_col), 
-                                            range(0, num_depth)):
-                        tensor_out[row][col][channel] = tensor_in[i][j][k] * float(filter_weights[i-row][j-col][k]) + tensor_out[row][col][channel] 
-                    if self.activation!="None":
+
+                    # 更新卷积操作，考虑步长
+                    for i in range(row * self.stride, row * self.stride + num_row):
+                        for j in range(col * self.stride, col * self.stride + num_col):
+                            for k in range(0, num_depth):
+                                tensor_out[row][col][channel] += tensor_in[i][j][k] * float(filter_weights[i - row * self.stride][j - col * self.stride][k])
+
+                    if self.activation != "None":
                         tensor_out[row][col][channel] = actFunc(tensor_out[row][col][channel], self.activation)
-                    #print(type(tensor_out[row][col][channel]))
-            #print("Finished %i feature Map" % channel)
-        
+
         if debug:
             print("[DEBUG]Finish Conv2D Layer forwarding!!")
 
-        #print("Feature Map Shape: %ix%ix%i" % tuple(out_shape))
         self._output = tensor_out
         return tensor_out
 
     def getOutput(self):
         return self._output
+
 
 
 class MaxPool2DLayer:
@@ -300,46 +303,45 @@ class MaxPool2DLayer:
         self.stride = stride
         self.padding = padding
         self._output = None
+    
     def forward(self, tensor_in):
         in_shape = dim(tensor_in)
-        assert(len(in_shape)==3)
+        assert(len(in_shape) == 3)
 
-        ## For now, we assume stride=1 and padding='valid'
-        ## TODO  stride!=1 and padding!='valid'
         r, c = self.pool_size[0], self.pool_size[1]
-        out_shape = [ in_shape[0] // r,
-                      in_shape[1] // c,
-                      in_shape[2]]
-        # tensor_out = np.zeros(out_shape).tolist()
+        s = self.stride  # 新增 stride
+
+        # 计算输出形状
+        out_shape = [(in_shape[0] - r) // s + 1,
+                     (in_shape[1] - c) // s + 1,
+                     in_shape[2]]
+
         tensor_out = []
+
         for _ in range(out_shape[0]):
-            tensor_out.append( [[0.0]*out_shape[2] for i in range(out_shape[1])] )
+            tensor_out.append([[0.0] * out_shape[2] for i in range(out_shape[1])])
 
         for row in range(0, out_shape[0]):
             for col in range(0, out_shape[1]):
                 for depth in range(0, out_shape[2]):
                     max_val = -10000
-                    if tensor_in[row*r  ][col*c  ][depth] > max_val:
-                        max_val = tensor_in[row*r  ][col*c  ][depth]
-                    if tensor_in[row*r+1][col*c  ][depth] > max_val:
-                        max_val = tensor_in[row*r+1][col*c  ][depth]
-                    if tensor_in[row*r  ][col*c+1][depth] > max_val:
-                        max_val = tensor_in[row*r  ][col*c+1][depth]
-                    if tensor_in[row*r+1][col*c+1][depth] > max_val:
-                        max_val = tensor_in[row*r+1][col*c+1][depth]
+
+                    for i in range(r):
+                        for j in range(c):
+                            if tensor_in[row * s + i][col * s + j][depth] > max_val:
+                                max_val = tensor_in[row * s + i][col * s + j][depth]
+
                     tensor_out[row][col][depth] = max_val
-                    #print(type(tensor_out[row][col][depth]))
-        ## fix the shape of tensor_out
 
         if debug:
             print("[DEBUG]Finish MaxPool2D Layer forwarding!!")
 
-        #print("Feature Map Shape: %ix%ix%i" % tuple(out_shape))
         self._output = tensor_out
         return tensor_out
 
     def getOutput(self):
         return self._output
+
 
 
 class FlattenLayer:
@@ -524,8 +526,11 @@ class NNModel:
             weights = layer.get_weights()[0].transpose(3, 0, 1, 2)
             biases = layer.get_weights()[1]
             activation = layer.get_config()['activation']
+            row_stride, col_stride = layer.strides
+            assert row_stride == col_stride
 
-            self.layers.append(Conv2DLayer(weights, biases, weights.shape))
+            self.layers.append(Conv2DLayer(
+                weights, biases, weights.shape, stride=row_stride))
             # print("Add Activation Layer:", activation)
             self.layers.append(ActivationLayer(activation))
         elif type(layer) == Dense:
@@ -541,8 +546,10 @@ class NNModel:
         elif type(layer) == MaxPool2D:
             #print("MaxPool2D")
             pool_size = layer.get_config()['pool_size']
+            row_stride, col_stride = layer.strides
+            assert row_stride == col_stride
             # print(pool_size)
-            self.layers.append(MaxPool2DLayer(pool_size))
+            self.layers.append(MaxPool2DLayer(pool_size, stride=row_stride))        
         elif type(layer) == Flatten:
             #print("Flatten")
             self.layers.append(FlattenLayer())
