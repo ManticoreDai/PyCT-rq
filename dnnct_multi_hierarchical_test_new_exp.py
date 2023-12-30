@@ -2,30 +2,36 @@ import time
 from multiprocessing import Process, Queue
 
 
+# model_name = "mnist_sep_act_m6_9653_noise"
 
+# model_name = "mnist_rnn_09650"
 # model_name = "mnist_lstm_09785"
-model_name = "mnist_rnn_09650"
-# model_name = "stock_LSTM_DenseF_day20_09262"
-# model_name = "imdb_LSTM_08509"
 
-NUM_PROCESS = 30
-TIMEOUT = 3600
+# model_name = "stock_LSTM_DenseF_day20_09262"
+
+model_name = "imdb_LSTM_08509"
+
+NUM_PROCESS = 2
+TIMEOUT = 15
 # TIMEOUT = 172800
 NORM_01 = True
 
 if __name__ == "__main__":
     from utils.pyct_attack_exp import run_multi_attack_subprocess_wall_timeout, run_multi_attack_subprocess_wall_timeout_task_queue
-    # from utils.pyct_attack_exp_research_question import (        
-    #     pyct_shap_1_4_8_16_32_only_first_forward,
-    #     pyct_shap_1_4_8_16_32_48_64, pyct_rnn_shap_1_4_8_16_32_48_64, pyct_rnn_shap_1_4_8_16_32_only_first_forward, pyct_random_1_4_8_16_32_48_64, pyct_lstm_stock_1_4_8_16_32, pyct_lstm_stock_1_4_8_16_32_only_first_forward, pyct_lstm_stock_1_2_3_4_8_limit_range02, pyct_imdb_random_1_range02
-    # )
+    # from utils.pyct_attack_exp_rq_hierarchical_2 import pyct_lstm_stock_shap_1_2_3_4_8_limit_range02, pyct_imdb_shap_1_2_3_4_8_limit_range02
+    from utils.pyct_attack_exp_rq_hierarchical_2_random import (
+        mnist_random_1_4_8_16_32_limit_range02,
+        rnn_mnist_random_1_4_8_16_32_limit_range02,
+        pyct_lstm_stock_random_1_2_3_4_8_limit_range02,
+        pyct_imdb_random_1_2_3_4_8_limit_range02,
+    )
+            
+    # inputs = pyct_lstm_stock_shap_1_2_3_4_8_limit_range02(model_name, first_n_img=100)
     
-    from utils.pyct_attack_exp_rq_hierarchical import rnn_mnist_shap_1_4_8_16_32_filter_input
-     
-    # inputs = pyct_lstm_stock_1_4_8_16_32_only_first_forward(model_name, first_n_img=502)
-    # inputs = pyct_lstm_stock_1_2_3_4_8_limit_range02(model_name, first_n_img=502)
-    # inputs = pyct_imdb_random_1_range02(model_name, first_n_img=60)
-    inputs = rnn_mnist_shap_1_4_8_16_32_filter_input(model_name)
+    # inputs = mnist_random_1_4_8_16_32_limit_range02(model_name, first_n_img=20)
+    # inputs = rnn_mnist_random_1_4_8_16_32_limit_range02(model_name, first_n_img=20) # RNN + LSTM共用
+    # inputs = pyct_lstm_stock_random_1_2_3_4_8_limit_range02(model_name, first_n_img=20)
+    inputs = pyct_imdb_random_1_2_3_4_8_limit_range02(model_name, first_n_img=20)
     
     print("#"*40, f"number of inputs: {len(inputs)}", "#"*40)
     time.sleep(3)
